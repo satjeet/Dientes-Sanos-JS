@@ -30,7 +30,7 @@
           </q-list>
         </div>
         <div v-else>
-          {{ user.displayName }}- <q-btn @click="logout">Cerrar Sesión</q-btn>
+          {{ userStore.name }}- <q-btn @click="logout">Cerrar Sesión</q-btn>
         </div>
       </q-toolbar>
     </q-header>
@@ -54,10 +54,19 @@
 </template>
 
 <script setup>
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import {
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  GoogleAuthProvider,
+} from "firebase/auth";
 import { auth } from "../firebase";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
+import { useUserStore } from "../stores/userStore.js";
+
+const userStore = useUserStore();
+
 const user = ref(null);
 const linksList = [
   {
@@ -77,6 +86,9 @@ function toggleLeftDrawer() {
 const provider = new GoogleAuthProvider();
 function LogingGoogle() {
   console.log("accessGoogle");
+  signInWithRedirect(auth, provider);
+
+  /*
   signInWithPopup(auth, provider)
     .then((result) => {
       // This gives you a Google Access Token. You can use it to access the Google API.
@@ -96,12 +108,36 @@ function LogingGoogle() {
       const credential = GoogleAuthProvider.credentialFromError(error);
       // ...
     });
+*/
 }
+onMounted(() => {
+  getRedirectResult(auth)
+    .then((result) => {
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential.accessToken;
+      // The signed-in user info.
+      user.value = result.user;
+      userStore.setUser(result.user);
+      // ...
+    })
+    .catch((error) => {
+      // Handle Errors here.
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // The email of the user's account used.
+      const email = error.customData ? error.customData.email : null;
+      // The AuthCredential type that was used.
+      const credential = GoogleAuthProvider.credentialFromError(error);
+      // ...
+    });
+});
 
 function logout() {
   auth
     .signOut()
     .then(() => {
+      userStore.resetUser();
       user.value = null;
     })
     .catch((error) => {
