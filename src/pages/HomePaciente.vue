@@ -20,7 +20,7 @@
           v-ripple
           @click="navegarHistorialCepillado"
         >
-          Historial de Cepillado
+          Historial de Cepillados
         </q-btn>
       </div>
     </q-page>
@@ -38,7 +38,7 @@ const navegarRegistroCepillado = () => {
 };
 
 const navegarHistorialCepillado = () => {
-  router.push("/historial-cepillado");
+  router.push("/HistorialCepillados");
 };
 </script>
 

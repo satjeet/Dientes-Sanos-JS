@@ -1,21 +1,25 @@
 <template>
   <q-page class="flex flex-center">
-    <q-btn class="full-width" @click="goToRegisterBrushing"
-      >Registrar Cepillado</q-btn
-    >
-    <q-btn class="full-width" @click="goToBrushingHistory"
-      >Historial de Cepillado</q-btn
-    >
+    Estoy en la index page
+    <div v-if="userStore.name == null">
+      <q-btn class="full-width" @click="goToRegisterBrushing"
+        >Registrar Cepilladosssssssss</q-btn
+      >
+      <q-btn class="full-width" @click="goToBrushingHistory"
+        >Historial de Cepillado</q-btn
+      >
+    </div>
   </q-page>
 </template>
 
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useUserStore } from "../stores/userStore.js";
 const router = useRouter();
-
+const userStore = useUserStore();
 const goToRegisterBrushing = () => {
-  router.push("/register-brushing");
+  router.push("/RegistrarCepillado");
 };
 
 const goToBrushingHistory = () => {
