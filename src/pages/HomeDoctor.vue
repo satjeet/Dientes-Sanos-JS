@@ -14,7 +14,7 @@
     </div>
 
     <div v-if="showPatientList">
-      <PatientListComponent :pacientes="pacienteStore.pacientes" />
+      <PatientListComponent :pacientes="pacientesStore.pacientes" />
     </div>
   </div>
 </template>
@@ -24,13 +24,14 @@ import { ref } from "vue";
 import { usePacienteStore } from "../stores/pacienteStore";
 import PatientListComponent from "../components/ListaPacientesComponente.vue";
 
-const pacienteStore = usePacienteStore();
+const pacientesStore = usePacienteStore();
 const showPatientList = ref(false);
 
 async function togglePatientList() {
   showPatientList.value = !showPatientList.value;
   if (showPatientList.value) {
-    await pacienteStore.obtenerPacientes(); // Cargar los pacientes
+    console.log("antes de llamar a obtener Pacinetes");
+    await pacientesStore.obtenerPacientes(); // Cargar los pacientes
     window.scrollTo(0, document.body.scrollHeight);
   }
 }

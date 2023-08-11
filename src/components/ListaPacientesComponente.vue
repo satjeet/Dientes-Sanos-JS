@@ -8,14 +8,14 @@
     <q-table
       :rows="filteredPatients"
       :columns="columns"
-      row-key="id"
+      row-key="name"
       v-model:pagination="pagination"
       :rows-per-page-options="[5, 10, 15]"
     >
-      <template v-slot:body-cell-imagen="props">
+      <template v-slot:body-cell-image="props">
         <q-td :props="props">
           <img
-            :src="props.row.imagenUrl"
+            :src="props.row.image"
             alt="Imagen del paciente"
             class="patient-image"
           />
@@ -34,9 +34,9 @@ const searchTerm = ref("");
 const filteredPatients = ref([...pacienteStore.pacientes]);
 
 const columns = [
-  { name: "nombre", label: "Nombre", align: "left", field: "nombre" },
-  { name: "edad", label: "Edad", align: "left", field: "edad" },
-  { name: "imagen", label: "Imagen", align: "left", field: "imagenUrl" },
+  { name: "name", label: "Nombre", align: "left", field: "name" },
+  { name: "email", label: "Email", align: "left", field: "email" },
+  { name: "image", label: "Imagen", align: "left", field: "image" },
   // Agrega más columnas según tus necesidades
 ];
 
@@ -48,7 +48,7 @@ const pagination = ref({
 function filterPatients() {
   if (searchTerm.value) {
     filteredPatients.value = pacienteStore.pacientes.filter((paciente) =>
-      paciente.nombre.toLowerCase().includes(searchTerm.value.toLowerCase())
+      paciente.name.toLowerCase().includes(searchTerm.value.toLowerCase())
     );
   } else {
     filteredPatients.value = [...pacienteStore.pacientes];

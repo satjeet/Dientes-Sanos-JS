@@ -26,6 +26,7 @@ export const usePacienteStore = defineStore("paciente", () => {
 
   const obtenerPacientes = async () => {
     try {
+      console.log("entrar a obtener pacientes: ");
       const usuariosRef = collection(db, "usuarios"); // Asume que tienes una colección "usuarios"
       const pacientesQuery = query(
         usuariosRef,
@@ -33,6 +34,7 @@ export const usePacienteStore = defineStore("paciente", () => {
       ); // Filtra por el rol de "Paciente"
       const pacientesSnapshot = await getDocs(pacientesQuery);
       pacientes.value = pacientesSnapshot.docs.map((doc) => doc.data());
+      console.log("quiero ver la lista de pacientes: ", pacientes.value);
     } catch (error) {
       console.error("Error al obtener los pacientes: ", error);
     }
