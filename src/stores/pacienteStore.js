@@ -7,7 +7,14 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
-import { collection, doc, addDoc, query, getDocs } from "firebase/firestore"; // Import Firestore methods
+import {
+  collection,
+  doc,
+  addDoc,
+  query,
+  getDocs,
+  where,
+} from "firebase/firestore"; // Import Firestore methods
 
 export const usePacienteStore = defineStore("paciente", () => {
   const registros = ref([]);
@@ -15,6 +22,21 @@ export const usePacienteStore = defineStore("paciente", () => {
   const hora = ref(null); // Asume un valor por defecto
   const imagenFile = ref(null); // Referencia al archivo de imagen
   const imagenUrl = ref(null); // Referencia a la URL de la imagen
+  const pacientes = ref([]); // Lista de pacientes
+
+  const obtenerPacientes = async () => {
+    try {
+      const usuariosRef = collection(db, "usuarios"); // Asume que tienes una colección "usuarios"
+      const pacientesQuery = query(
+        usuariosRef,
+        where("role", "==", "Paciente")
+      ); // Filtra por el rol de "Paciente"
+      const pacientesSnapshot = await getDocs(pacientesQuery);
+      pacientes.value = pacientesSnapshot.docs.map((doc) => doc.data());
+    } catch (error) {
+      console.error("Error al obtener los pacientes: ", error);
+    }
+  };
 
   const obtenerHistorialCepillados = async () => {
     try {
@@ -95,5 +117,7 @@ export const usePacienteStore = defineStore("paciente", () => {
     actualizarImagenUrl, // Agregar esta línea
     imagenUrl, // Agregar esta línea si necesitas acceder a la URL desde fuera del store
     obtenerHistorialCepillados,
+    pacientes,
+    obtenerPacientes,
   };
 });

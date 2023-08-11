@@ -1,49 +1,71 @@
 <template>
-  <div class="home-doctor">
-    <q-page>
-      <q-toolbar>
-        <q-toolbar-title> Bienvenido, Doctor </q-toolbar-title>
-      </q-toolbar>
+  <div class="home-doc-container">
+    <q-btn class="toggle-button" @click="togglePatientList">
+      {{ showPatientList ? "Regresar" : "Ver Lista de Pacientes" }}
+    </q-btn>
 
-      <div class="botones-container">
-        <q-btn
-          class="boton"
-          color="primary"
-          v-ripple
-          @click="navegarListaPacientes"
-        >
-          Ver Lista de Pacientes
-        </q-btn>
-      </div>
-    </q-page>
+    <div v-if="!showPatientList" class="home-doc-card">
+      <q-card-section class="home-doc-header">
+        <h2>Bienvenido Doctor</h2>
+      </q-card-section>
+      <q-card-section class="home-doc-content">
+        <p>Accede a la información de tus pacientes y gestiona sus citas.</p>
+      </q-card-section>
+    </div>
+
+    <div v-if="showPatientList">
+      <PatientListComponent :pacientes="pacienteStore.pacientes" />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
+import { ref } from "vue";
+import { usePacienteStore } from "../stores/pacienteStore";
+import PatientListComponent from "../components/ListaPacientesComponente.vue";
 
-const router = useRouter();
+const pacienteStore = usePacienteStore();
+const showPatientList = ref(false);
 
-const navegarListaPacientes = () => {
-  router.push("/ListaPacientes"); // Ruta a la página con la lista de pacientes
-};
+async function togglePatientList() {
+  showPatientList.value = !showPatientList.value;
+  if (showPatientList.value) {
+    await pacienteStore.obtenerPacientes(); // Cargar los pacientes
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+}
 </script>
 
 <style scoped>
-.home-doctor {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.botones-container {
+.home-doc-container {
   display: flex;
   flex-direction: column;
-  margin-top: 20px;
+  align-items: center;
+  background-color: #e6f7ff; /* Color azul claro y tranquilizador */
 }
 
-.boton {
-  margin: 0 20px;
-  width: calc(100% - 40px);
+.toggle-button {
+  margin: 20px;
+  background-color: #1890ff; /* Color azul principal */
+  color: white;
+}
+
+.home-doc-card {
+  width: 400px;
+  text-align: center;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+}
+
+.home-doc-header {
+  background-color: #1890ff; /* Color azul principal */
+  color: white;
+  padding: 20px;
+  border-radius: 10px 10px 0 0;
+}
+
+.home-doc-content {
+  padding: 20px;
 }
 </style>
