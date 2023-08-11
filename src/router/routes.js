@@ -5,8 +5,13 @@ const routes = [
     children: [
       { path: "", component: () => import("pages/IndexPage.vue") },
       {
-        path: "/home",
+        path: "/Home",
         component: () => import("pages/HomePaciente.vue"),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: "/Homedoc",
+        component: () => import("pages/HomeDoctor.vue"),
         meta: { requiresAuth: true },
       },
       {

@@ -59,19 +59,22 @@ import {
   signInWithRedirect,
   getRedirectResult,
   GoogleAuthProvider,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { auth } from "../firebase";
 import { ref, onMounted } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
 import { useUserStore } from "../stores/userStore.js";
-import { onAuthStateChanged } from "firebase/auth";
 
 // Importa useRouter de vue-router
 import { useRouter } from "vue-router";
 
 const userStore = useUserStore();
+// Dentro de la función setup
+const router = useRouter(); // Utiliza useRouter para acceder al objeto del router
 
 const user = ref(null);
+
 const linksList = [
   {
     title: "Correo Electronico",
@@ -80,6 +83,7 @@ const linksList = [
     link: "https://mail.google.com/mail/",
   },
 ];
+const essentialLinks = linksList;
 
 const leftDrawerOpen = ref(false);
 
@@ -94,11 +98,23 @@ function LogingGoogle() {
 }
 onMounted(() => {
   // Suscribirse al evento de cambio de estado de autenticación
-  onAuthStateChanged(auth, (authUser) => {
+  onAuthStateChanged(auth, async (authUser) => {
     if (authUser) {
       // El usuario está autenticado
       user.value = authUser;
-      userStore.setUser(authUser);
+
+      // Recuperar el usuario desde Firestore
+      const userData = await userStore.fetchUser(authUser.uid); // Usa 'await' aquí
+
+      // Asignar el usuario en el store de usuario
+      userStore.setUser(userData);
+
+      // Redirigir según el rol
+      if (userData.role === "Doctor") {
+        router.push("/Homedoc");
+      } else {
+        router.push("/Home");
+      }
     } else {
       // El usuario no está autenticado
       user.value = null;
@@ -107,14 +123,24 @@ onMounted(() => {
   });
 
   getRedirectResult(auth)
-    .then((result) => {
+    .then(async (result) => {
       // This gives you a Google Access Token. You can use it to access the Google API.
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential.accessToken;
-      // The signed-in user info.
+
       user.value = result.user;
-      userStore.setUser(result.user);
-      // ...
+
+      // Guardar el usuario en Firestore
+      await userStore.saveUser(result.user);
+
+      // Asignar el usuario en el store de usuario
+      userStore.setUser({
+        ...result.user,
+        role: "Paciente", // Rol por defecto
+      });
+
+      // Redirigir al home del paciente
+      router.push("/Home");
     })
     .catch((error) => {
       // Handle Errors here.
@@ -127,9 +153,6 @@ onMounted(() => {
       // ...
     });
 });
-// Dentro de la función setup
-const router = useRouter(); // Utiliza useRouter para acceder al objeto del router
-
 function logout() {
   auth
     .signOut()
@@ -143,6 +166,4 @@ function logout() {
       console.error("Error signing out: ", error);
     });
 }
-
-const essentialLinks = linksList;
 </script>
