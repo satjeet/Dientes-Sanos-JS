@@ -105,9 +105,15 @@ onMounted(() => {
 
       // Recuperar el usuario desde Firestore
       const userData = await userStore.fetchUser(authUser.uid); // Usa 'await' aquí
+      console.log("userData from Firestore:", userData); // Agrega esta línea
 
       // Asignar el usuario en el store de usuario
-      userStore.setUser(userData);
+      // Asignar el usuario en el store de usuario
+      if (userData) {
+        userStore.setUser(userData);
+      } else {
+        console.error("No se pudo obtener userData desde Firestore");
+      }
 
       // Redirigir según el rol
       if (userData.role === "Doctor") {

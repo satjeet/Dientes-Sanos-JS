@@ -1,45 +1,66 @@
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase"; // Asegúrate de importar tu instancia de Firestore
-import { defineStore } from "pinia";
+import { ref } from "vue";
 
-export const useUserStore = defineStore({
-  id: "user",
-  state: () => ({
-    name: null,
-    email: null,
-    image: null,
-    role: "Paciente", // Valor por defecto
-  }),
+export const useUserStore = () => {
+  const name = ref(null);
+  const email = ref(null);
+  const image = ref(null);
+  const uid = ref(null);
+  const role = ref("Paciente"); // Valor por defecto
 
-  actions: {
-    async saveUser(user) {
-      const userRef = doc(db, "usuarios", user.uid);
-      await setDoc(userRef, {
-        name: user.name,
-        email: user.email,
-        image: user.image,
-        role: "Paciente", // Rol por defecto para nuevos usuarios
-      });
-    },
+  const saveUser = async (user) => {
+    const userRef = doc(db, "usuarios", user.uid);
+    await setDoc(userRef, {
+      name: user.displayName, // Asegúrate de que estos campos existen en el objeto 'user'
+      email: user.email,
+      image: user.photoURL,
+      uid: user.uid,
+      role: "Paciente", // Rol por defecto para nuevos usuarios
+    });
+  };
 
-    async fetchUser(uid) {
-      const userRef = doc(db, "usuarios", uid);
-      const userSnapshot = await getDoc(userRef);
-      return userSnapshot.data();
-    },
+  // ...
 
-    setUser(user) {
-      this.name = user.name;
-      this.email = user.email;
-      this.image = user.image;
-      this.role = user.role;
-    },
+  const fetchUser = async (uidValue) => {
+    const userRef = doc(db, "usuarios", uidValue);
+    const userSnapshot = await getDoc(userRef);
+    if (userSnapshot.exists()) {
+      const userData = userSnapshot.data();
+      return userData; // Devuelve los datos aquí
+    } else {
+      console.error("No se encontró el usuario con UID:", uidValue);
+      return null; // Devuelve null si no se encuentra el usuario
+    }
+  };
 
-    resetUser() {
-      this.name = null;
-      this.email = null;
-      this.image = null;
-      this.role = "Paciente";
-    },
-  },
-});
+  // ...
+
+  const setUser = (user) => {
+    name.value = user.name;
+    email.value = user.email;
+    image.value = user.image;
+    uid.value = user.uid;
+    role.value = user.role;
+  };
+
+  const resetUser = () => {
+    name.value = null;
+    email.value = null;
+    image.value = null;
+    uid.value = null;
+    role.value = "Paciente";
+  };
+
+  return {
+    name,
+    email,
+    image,
+    uid,
+    role,
+    saveUser,
+    fetchUser,
+    setUser,
+    resetUser,
+  };
+};

@@ -23,6 +23,11 @@ export const usePacienteStore = defineStore("paciente", () => {
   const imagenFile = ref(null); // Referencia al archivo de imagen
   const imagenUrl = ref(null); // Referencia a la URL de la imagen
   const pacientes = ref([]); // Lista de pacientes
+  const selectedPatient = ref(null);
+
+  const setSelectedPatient = (patient) => {
+    selectedPatient.value = patient;
+  };
 
   const obtenerPacientes = async () => {
     try {
@@ -33,10 +38,32 @@ export const usePacienteStore = defineStore("paciente", () => {
         where("role", "==", "Paciente")
       ); // Filtra por el rol de "Paciente"
       const pacientesSnapshot = await getDocs(pacientesQuery);
-      pacientes.value = pacientesSnapshot.docs.map((doc) => doc.data());
+      pacientes.value = pacientesSnapshot.docs.map((doc) => {
+        return { uid: doc.id, ...doc.data() }; // Invoca doc.data() como una función
+      });
       console.log("quiero ver la lista de pacientes: ", pacientes.value);
     } catch (error) {
       console.error("Error al obtener los pacientes: ", error);
+    }
+  };
+
+  // obtener historial por uid especificado
+  const obtenerHistorialCepilladosPorUid = async (uid) => {
+    try {
+      if (!uid) {
+        console.log("UID:", uid);
+
+        throw new Error("UID no proporcionado");
+      }
+      console.log("UID:", uid);
+
+      const cepilladoRef = collection(db, "usuarios", uid, "cepillados");
+      const cepilladoQuery = query(cepilladoRef);
+      const querySnapshot = await getDocs(cepilladoQuery);
+
+      registros.value = querySnapshot.docs.map((doc) => doc.data());
+    } catch (error) {
+      console.error("Error al obtener el historial de cepillados: ", error);
     }
   };
 
@@ -119,7 +146,10 @@ export const usePacienteStore = defineStore("paciente", () => {
     actualizarImagenUrl, // Agregar esta línea
     imagenUrl, // Agregar esta línea si necesitas acceder a la URL desde fuera del store
     obtenerHistorialCepillados,
+    obtenerHistorialCepilladosPorUid,
     pacientes,
     obtenerPacientes,
+    selectedPatient,
+    setSelectedPatient,
   };
 });

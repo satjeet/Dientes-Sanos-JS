@@ -11,6 +11,7 @@
       row-key="name"
       v-model:pagination="pagination"
       :rows-per-page-options="[5, 10, 15]"
+      @row-click="loadCepilladoHistorial"
     >
       <template v-slot:body-cell-image="props">
         <q-td :props="props">
@@ -22,22 +23,26 @@
         </q-td>
       </template>
     </q-table>
+    <div v-if="selectedPatient">
+      <CepilladoHistorialComponent />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { usePacienteStore } from "../stores/pacienteStore";
+import CepilladoHistorialComponent from "./CepilladoHistorialComponent.vue";
 
 const pacienteStore = usePacienteStore();
 const searchTerm = ref("");
-const filteredPatients = ref([...pacienteStore.pacientes]);
+const filteredPatients = ref([]);
+const selectedPatient = ref(null);
 
 const columns = [
   { name: "name", label: "Nombre", align: "left", field: "name" },
   { name: "email", label: "Email", align: "left", field: "email" },
   { name: "image", label: "Imagen", align: "left", field: "image" },
-  // Agrega más columnas según tus necesidades
 ];
 
 const pagination = ref({
@@ -54,6 +59,21 @@ function filterPatients() {
     filteredPatients.value = [...pacienteStore.pacientes];
   }
 }
+
+async function loadCepilladoHistorial(evt, row) {
+  console.log("row: en lista pacientes componente", row);
+  console.log("UID: en lista pacientes componente", row.uid);
+
+  pacienteStore.setSelectedPatient(row);
+  await pacienteStore.obtenerHistorialCepilladosPorUid(row.uid);
+}
+
+onMounted(() => {
+  pacienteStore.obtenerPacientes();
+  filteredPatients.value = [...pacienteStore.pacientes];
+});
+
+const components = { CepilladoHistorialComponent };
 </script>
 
 <style scoped>
