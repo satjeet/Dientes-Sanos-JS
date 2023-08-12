@@ -11,32 +11,59 @@ export const useUserStore = () => {
 
   const saveUser = async (user) => {
     const userRef = doc(db, "usuarios", user.uid);
-    await setDoc(userRef, {
-      name: user.displayName, // Asegúrate de que estos campos existen en el objeto 'user'
-      email: user.email,
-      image: user.photoURL,
-      uid: user.uid,
-      role: "Paciente", // Rol por defecto para nuevos usuarios
-    });
-  };
-
-  // ...
-
-  const fetchUser = async (uidValue) => {
-    const userRef = doc(db, "usuarios", uidValue);
     const userSnapshot = await getDoc(userRef);
     if (userSnapshot.exists()) {
       const userData = userSnapshot.data();
-      return userData; // Devuelve los datos aquí
+      await setDoc(userRef, {
+        name: user.displayName || userData.name,
+        email: user.email || userData.email,
+        image: user.photoURL || userData.image,
+        uid: user.uid,
+        role: userData.role || "Paciente", // Mantener el rol existente
+      });
     } else {
-      console.error("No se encontró el usuario con UID:", uidValue);
-      return null; // Devuelve null si no se encuentra el usuario
+      await setDoc(userRef, {
+        name: user.displayName,
+        email: user.email,
+        image: user.photoURL,
+        uid: user.uid,
+        role: "Paciente", // Rol por defecto para nuevos usuarios
+      });
     }
   };
 
   // ...
 
+  const fetchUser = async (uidValue) => {
+    try {
+      const userRef = doc(db, "usuarios", uidValue);
+      const userSnapshot = await getDoc(userRef);
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        if (userData) {
+          return {
+            name: userData.name || null,
+            email: userData.email || null,
+            image: userData.image || null,
+            uid: userData.uid || null,
+            role: userData.role || "Paciente", // Default value if role is not defined
+          };
+        } else {
+          console.error("UserData is undefined for UID:", uidValue);
+        }
+      } else {
+        console.error("No se encontró el usuario con UID:", uidValue);
+      }
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    }
+    return null; // Return null if user not found or an error occurred
+  };
+
+  // ...
+
   const setUser = (user) => {
+    console.log("setUser llamado con:", user);
     name.value = user.name;
     email.value = user.email;
     image.value = user.image;
@@ -45,6 +72,7 @@ export const useUserStore = () => {
   };
 
   const resetUser = () => {
+    console.log("resetUser llamado");
     name.value = null;
     email.value = null;
     image.value = null;

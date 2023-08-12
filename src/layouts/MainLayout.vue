@@ -100,29 +100,32 @@ onMounted(() => {
   // Suscribirse al evento de cambio de estado de autenticación
   onAuthStateChanged(auth, async (authUser) => {
     if (authUser) {
-      // El usuario está autenticado
-      user.value = authUser;
+      const userData = await userStore.fetchUser(authUser.uid);
+      if (!userData) {
+        console.log("guarda un paciente");
 
-      // Recuperar el usuario desde Firestore
-      const userData = await userStore.fetchUser(authUser.uid); // Usa 'await' aquí
-      console.log("userData from Firestore:", userData); // Agrega esta línea
-
-      // Asignar el usuario en el store de usuario
-      // Asignar el usuario en el store de usuario
-      if (userData) {
-        userStore.setUser(userData);
+        await userStore.saveUser({
+          ...authUser,
+          role: "Paciente",
+        });
       } else {
-        console.error("No se pudo obtener userData desde Firestore");
-      }
+        console.log("guarda el rol", userData.role);
 
-      // Redirigir según el rol
-      if (userData.role === "Doctor") {
+        await userStore.saveUser({
+          ...authUser,
+          role: userData.role,
+        });
+      }
+      const updatedUserData = await userStore.fetchUser(authUser.uid);
+      if (updatedUserData) {
+        userStore.setUser(updatedUserData);
+      }
+      if (updatedUserData && updatedUserData.role === "Doctor") {
         router.push("/Homedoc");
       } else {
         router.push("/Home");
       }
     } else {
-      // El usuario no está autenticado
       user.value = null;
       userStore.resetUser();
     }
@@ -139,12 +142,17 @@ onMounted(() => {
       // Guardar el usuario en Firestore
       await userStore.saveUser(result.user);
 
+      const userData = await userStore.fetchUser(result.user.uid);
+      if (userData) {
+        userStore.setUser(userData);
+      }
       // Asignar el usuario en el store de usuario
+      /*
       userStore.setUser({
         ...result.user,
         role: "Paciente", // Rol por defecto
       });
-
+*/
       // Redirigir al home del paciente
       router.push("/Home");
     })

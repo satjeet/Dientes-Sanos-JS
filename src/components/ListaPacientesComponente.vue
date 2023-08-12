@@ -1,79 +1,67 @@
 <template>
   <div>
-    <q-input
-      v-model="searchTerm"
-      placeholder="Buscar paciente..."
-      @input="filterPatients"
-    />
-    <q-table
-      :rows="filteredPatients"
-      :columns="columns"
-      row-key="name"
-      v-model:pagination="pagination"
-      :rows-per-page-options="[5, 10, 15]"
-      @row-click="loadCepilladoHistorial"
-    >
-      <template v-slot:body-cell-image="props">
-        <q-td :props="props">
-          <img
-            :src="props.row.image"
-            alt="Imagen del paciente"
-            class="patient-image"
-          />
-        </q-td>
+    <q-input v-model="searchTerm" placeholder="Buscar paciente..." />
+    <q-table :rows="filteredPatients" :columns="columns" row-key="uid">
+      <template v-slot:body="props">
+        <q-tr :props="props" @click="loadCepilladoHistorial($event, props.row)">
+          <q-td key="image" :props="props">
+            <img
+              :src="props.row.image"
+              alt="Imagen del paciente"
+              class="patient-image"
+            />
+          </q-td>
+          <q-td key="name" :props="props">{{ props.row.name }}</q-td>
+          <q-td key="email" :props="props">{{ props.row.email }}</q-td>
+        </q-tr>
       </template>
     </q-table>
-    <div v-if="selectedPatient">
+    <div>
       <CepilladoHistorialComponent />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { QTable, QTh, QTr, QTd } from "quasar";
 import { usePacienteStore } from "../stores/pacienteStore";
 import CepilladoHistorialComponent from "./CepilladoHistorialComponent.vue";
 
 const pacienteStore = usePacienteStore();
 const searchTerm = ref("");
-const filteredPatients = ref([]);
-const selectedPatient = ref(null);
 
-const columns = [
-  { name: "name", label: "Nombre", align: "left", field: "name" },
-  { name: "email", label: "Email", align: "left", field: "email" },
-  { name: "image", label: "Imagen", align: "left", field: "image" },
-];
-
-const pagination = ref({
-  rowsPerPage: 5,
-  currentPage: 1,
+// Llama a obtenerPacientes cuando el componente se monte
+onMounted(async () => {
+  await pacienteStore.obtenerPacientes();
 });
 
-function filterPatients() {
-  if (searchTerm.value) {
-    filteredPatients.value = pacienteStore.pacientes.filter((paciente) =>
+const columns = [
+  {
+    name: "image",
+    label: "Imagen",
+    field: "image",
+    align: "left",
+    sortable: false,
+  },
+  { name: "name", label: "Nombre", field: "name", align: "left" },
+  { name: "email", label: "Email", field: "email", align: "left" },
+];
+
+const filteredPatients = computed(() => {
+  if (pacienteStore.pacientes && searchTerm.value.trim() !== "") {
+    return pacienteStore.pacientes.filter((paciente) =>
       paciente.name.toLowerCase().includes(searchTerm.value.toLowerCase())
     );
   } else {
-    filteredPatients.value = [...pacienteStore.pacientes];
+    return pacienteStore.pacientes || []; // Asegúrate de que los pacientes estén disponibles
   }
-}
+});
 
 async function loadCepilladoHistorial(evt, row) {
-  console.log("row: en lista pacientes componente", row);
-  console.log("UID: en lista pacientes componente", row.uid);
-
   pacienteStore.setSelectedPatient(row);
   await pacienteStore.obtenerHistorialCepilladosPorUid(row.uid);
 }
-
-onMounted(() => {
-  pacienteStore.obtenerPacientes();
-  filteredPatients.value = [...pacienteStore.pacientes];
-});
-
-const components = { CepilladoHistorialComponent };
 </script>
 
 <style scoped>

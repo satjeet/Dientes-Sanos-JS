@@ -30,7 +30,7 @@ const showPatientList = ref(false);
 async function togglePatientList() {
   showPatientList.value = !showPatientList.value;
   if (showPatientList.value) {
-    console.log("antes de llamar a obtener Pacinetes");
+    console.log("antes de llamar a obtener Pacientes");
     await pacientesStore.obtenerPacientes(); // Cargar los pacientes
     window.scrollTo(0, document.body.scrollHeight);
   }

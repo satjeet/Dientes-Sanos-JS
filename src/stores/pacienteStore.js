@@ -1,5 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import { reactive } from "vue";
+
 import { db, auth } from "../firebase"; // Importa tu instancia de Firebase
 import {
   getStorage,
@@ -17,31 +19,36 @@ import {
 } from "firebase/firestore"; // Import Firestore methods
 
 export const usePacienteStore = defineStore("paciente", () => {
+  const state = reactive({
+    fecha: new Date(),
+    hora: null, // Asume un valor por defecto
+    imagenFile: null, // Referencia al archivo de imagen
+    imagenUrl: null, // Referencia a la URL de la imagen
+
+    selectedPatient: null,
+  });
   const registros = ref([]);
-  const fecha = ref(new Date());
-  const hora = ref(null); // Asume un valor por defecto
-  const imagenFile = ref(null); // Referencia al archivo de imagen
-  const imagenUrl = ref(null); // Referencia a la URL de la imagen
   const pacientes = ref([]); // Lista de pacientes
-  const selectedPatient = ref(null);
 
   const setSelectedPatient = (patient) => {
-    selectedPatient.value = patient;
+    console.log("Antes de seleccionar paciente:", state.selectedPatient);
+    state.selectedPatient = patient;
+    console.log("Después de seleccionar paciente:", state.selectedPatient);
   };
 
   const obtenerPacientes = async () => {
     try {
       console.log("entrar a obtener pacientes: ");
-      const usuariosRef = collection(db, "usuarios"); // Asume que tienes una colección "usuarios"
+      const usuariosRef = collection(db, "usuarios");
       const pacientesQuery = query(
         usuariosRef,
         where("role", "==", "Paciente")
-      ); // Filtra por el rol de "Paciente"
+      );
       const pacientesSnapshot = await getDocs(pacientesQuery);
       pacientes.value = pacientesSnapshot.docs.map((doc) => {
-        return { uid: doc.id, ...doc.data() }; // Invoca doc.data() como una función
+        return { uid: doc.id, ...doc.data() };
       });
-      console.log("quiero ver la lista de pacientes: ", pacientes.value);
+      console.log("quiero ver la lista de pacientes: ", state.pacientes);
     } catch (error) {
       console.error("Error al obtener los pacientes: ", error);
     }
@@ -50,18 +57,13 @@ export const usePacienteStore = defineStore("paciente", () => {
   // obtener historial por uid especificado
   const obtenerHistorialCepilladosPorUid = async (uid) => {
     try {
-      if (!uid) {
-        console.log("UID:", uid);
-
-        throw new Error("UID no proporcionado");
-      }
-      console.log("UID:", uid);
-
       const cepilladoRef = collection(db, "usuarios", uid, "cepillados");
       const cepilladoQuery = query(cepilladoRef);
       const querySnapshot = await getDocs(cepilladoQuery);
 
-      registros.value = querySnapshot.docs.map((doc) => doc.data());
+      const nuevosRegistros = querySnapshot.docs.map((doc) => doc.data());
+      registros.value = nuevosRegistros; // Actualiza los registros directamente
+      console.log("Registros recuperados:", registros.value);
     } catch (error) {
       console.error("Error al obtener el historial de cepillados: ", error);
     }
@@ -143,13 +145,13 @@ export const usePacienteStore = defineStore("paciente", () => {
     actualizarFecha,
     actualizarHora,
     actualizarImagenFile,
-    actualizarImagenUrl, // Agregar esta línea
-    imagenUrl, // Agregar esta línea si necesitas acceder a la URL desde fuera del store
+    actualizarImagenUrl,
+    imagenUrl: state.imagenUrl,
     obtenerHistorialCepillados,
     obtenerHistorialCepilladosPorUid,
     pacientes,
     obtenerPacientes,
-    selectedPatient,
+    selectedPatient: state.selectedPatient,
     setSelectedPatient,
   };
 });
