@@ -20,19 +20,7 @@ import { usePacienteStore } from "../stores/pacienteStore";
 import { computed } from "vue";
 const pacienteStore = usePacienteStore();
 import { formatDate, formatTime } from "../utils/dateUtils";
-/*
-// Observa los cambios en selectedPatient y actualiza los registros en consecuencia
-watch(
-  () => pacienteStore.pacienteSeleccionado,
-  async (newPatient, oldPatient) => {
-    console.log("Watcher - Paciente antiguo:", oldPatient);
-    console.log("Watcher - Paciente nuevo:", newPatient);
-    if (newPatient) {
-      await pacienteStore.obtenerHistorialCepilladosPorUid(newPatient.uid);
-    }
-  },
-  { deep: true }
-);*/
+
 const registros = computed(() => pacienteStore.registros);
 //const registros = pacienteStore.registros;
 </script>

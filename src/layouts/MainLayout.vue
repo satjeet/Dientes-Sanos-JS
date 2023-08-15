@@ -10,28 +10,9 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
-
-        <q-toolbar-title> Dientes Sanos</q-toolbar-title>
-        <div class="q-pa-md" v-if="!user">
-          <q-list bordered separator>
-            <q-slide-item @left="LogingGoogle">
-              <template v-slot:left>
-                <q-icon name="sentiment_very_satisfied" />
-                Cuida tu Salud
-              </template>
-
-              <q-item class="bg-blue">
-                <q-item-section avatar>
-                  <q-icon name="start" />
-                </q-item-section>
-                <q-item-section>Desliza para Ingresar </q-item-section>
-              </q-item>
-            </q-slide-item>
-          </q-list>
-        </div>
-        <div v-else>
-          {{ userStore.name }}- <q-btn @click="logout">Cerrar Sesión</q-btn>
-        </div>
+        <q-toolbar-title @click="navigateToHome">
+          <span class="company-name">Dientes Sanos</span>
+        </q-toolbar-title>
       </q-toolbar>
     </q-header>
 
@@ -44,6 +25,16 @@
           :key="link.title"
           v-bind="link"
         />
+
+        <!-- Botón de Cerrar Sesión en la sección de Contactenos -->
+        <div v-if="userStore.uid.value !== null">
+          <q-item clickable @click="logout">
+            <q-item-section avatar>
+              <q-icon name="logout" />
+            </q-item-section>
+            <q-item-section>Cerrar Sesión</q-item-section>
+          </q-item>
+        </div>
       </q-list>
     </q-drawer>
 
@@ -91,6 +82,9 @@ function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 
+function navigateToHome() {
+  router.push({ path: "/" });
+}
 const provider = new GoogleAuthProvider();
 function LogingGoogle() {
   console.log("accessGoogle");
@@ -181,3 +175,77 @@ function logout() {
     });
 }
 </script>
+<style scoped>
+.q-layout {
+  background: #ffffff;
+}
+
+q-toolbar {
+  background: #2196f3;
+  color: white;
+}
+
+.company-name {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+}
+
+q-drawer {
+  background: #ffffff;
+}
+
+q-item-label {
+  font-weight: bold;
+  color: #2196f3;
+}
+
+q-item {
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+q-item:hover {
+  background: #f0f0f0;
+}
+
+q-item-section {
+  color: #555;
+}
+
+q-item-section avatar q-icon {
+  font-size: 1.2rem;
+  color: #2196f3;
+}
+
+q-page-container {
+  padding: 20px;
+}
+
+.EssentialLink a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.EssentialLink q-icon {
+  color: #2196f3;
+}
+
+q-form {
+  margin-bottom: 20px;
+}
+
+q-input {
+  font-size: 1.25rem;
+}
+
+q-input label {
+  font-size: 1.25rem;
+}
+
+q-btn {
+  margin-top: 10px;
+}
+</style>

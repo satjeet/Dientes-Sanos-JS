@@ -36,13 +36,13 @@ async function togglePatientList() {
   }
 }
 </script>
-
 <style scoped>
 .home-doc-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   background-color: #e6f7ff; /* Color azul claro y tranquilizador */
+  padding: 10px; /* Añade padding alrededor del contenedor */
 }
 
 .toggle-button {
@@ -52,7 +52,8 @@ async function togglePatientList() {
 }
 
 .home-doc-card {
-  width: 400px;
+  width: 90%; /* Ajusta el ancho para diferentes tamaños de pantalla */
+  max-width: 400px; /* Ancho máximo para pantallas grandes */
   text-align: center;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -68,5 +69,41 @@ async function togglePatientList() {
 
 .home-doc-content {
   padding: 20px;
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 600px) {
+  .home-doc-card {
+    margin: 10px;
+  }
+
+  .toggle-button {
+    margin: 10px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Ajustes para pantallas medianas */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .home-doc-card {
+    margin: 15px;
+  }
+
+  .toggle-button {
+    margin: 15px;
+    font-size: 1rem;
+  }
+}
+
+/* Ajustes para pantallas grandes */
+@media (min-width: 1025px) {
+  .home-doc-card {
+    margin: 20px;
+  }
+
+  .toggle-button {
+    margin: 20px;
+    font-size: 1.1rem;
+  }
 }
 </style>

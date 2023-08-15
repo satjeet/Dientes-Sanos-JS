@@ -1,13 +1,16 @@
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase"; // Asegúrate de importar tu instancia de Firestore
-import { ref } from "vue";
+import { ref, computed } from "vue";
+const name = ref(null);
 
 export const useUserStore = () => {
-  const name = ref(null);
   const email = ref(null);
   const image = ref(null);
   const uid = ref(null);
   const role = ref("Paciente"); // Valor por defecto
+
+  const computedName = computed(() => name.value);
+  const isUserSet = computed(() => name.value !== null && uid.value !== null);
 
   const saveUser = async (user) => {
     const userRef = doc(db, "usuarios", user.uid);
@@ -69,6 +72,7 @@ export const useUserStore = () => {
     image.value = user.image;
     uid.value = user.uid;
     role.value = user.role;
+    console.log("name del set user:", name.value);
   };
 
   const resetUser = () => {
@@ -81,6 +85,8 @@ export const useUserStore = () => {
   };
 
   return {
+    isUserSet,
+    computedName,
     name,
     email,
     image,

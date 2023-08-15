@@ -27,6 +27,7 @@ export const usePacienteStore = defineStore("paciente", () => {
 
     selectedPatient: null,
   });
+  const isDataLoaded = ref(false);
   const registros = ref([]);
   const pacientes = ref([]); // Lista de pacientes
 
@@ -49,6 +50,7 @@ export const usePacienteStore = defineStore("paciente", () => {
         return { uid: doc.id, ...doc.data() };
       });
       console.log("quiero ver la lista de pacientes: ", state.pacientes);
+      isDataLoaded.value = true;
     } catch (error) {
       console.error("Error al obtener los pacientes: ", error);
     }
@@ -56,6 +58,8 @@ export const usePacienteStore = defineStore("paciente", () => {
 
   // obtener historial por uid especificado
   const obtenerHistorialCepilladosPorUid = async (uid) => {
+    console.log("obtener historial:");
+
     try {
       const cepilladoRef = collection(db, "usuarios", uid, "cepillados");
       const cepilladoQuery = query(cepilladoRef);
@@ -64,6 +68,7 @@ export const usePacienteStore = defineStore("paciente", () => {
       const nuevosRegistros = querySnapshot.docs.map((doc) => doc.data());
       registros.value = nuevosRegistros; // Actualiza los registros directamente
       console.log("Registros recuperados:", registros.value);
+      isDataLoaded.value = true;
     } catch (error) {
       console.error("Error al obtener el historial de cepillados: ", error);
     }
@@ -84,7 +89,7 @@ export const usePacienteStore = defineStore("paciente", () => {
 
   const agregarRegistro = async () => {
     try {
-      if (!imagenFile.value || !imagenFile.value.name) {
+      if (!state.imagenFile || !state.imagenFile.name) {
         console.error(
           "No hay imagen seleccionada o el nombre de archivo no es válido"
         );
@@ -94,19 +99,19 @@ export const usePacienteStore = defineStore("paciente", () => {
 
       // Obtener una referencia al servicio de almacenamiento y al archivo
       const storage = getStorage();
-      const filePath = `usuarios/${userId}/images/${imagenFile.value.name}`; // Usa el nombre del archivo
+      const filePath = `usuarios/${userId}/images/${state.imagenFile.name}`; // Usa el nombre del archivo
       const fileRef = storageRef(storage, filePath);
 
       // Subir el archivo a Firebase Storage
-      const snapshot = await uploadBytes(fileRef, imagenFile.value);
+      const snapshot = await uploadBytes(fileRef, state.imagenFile);
 
       // Obtener la URL de descarga del archivo
-      imagenUrl.value = await getDownloadURL(snapshot.ref);
+      state.imagenUrl = await getDownloadURL(snapshot.ref);
 
       const nuevoRegistro = {
-        fecha: fecha.value,
-        hora: hora.value,
-        imagenUrl: imagenUrl.value, // Usa la URL de la imagen
+        fecha: state.fecha,
+        hora: state.hora,
+        imagenUrl: state.imagenUrl, // Usa la URL de la imagen
       };
 
       // Lógica para guardar el registro en Firebase y en el store de Pinia
@@ -126,17 +131,17 @@ export const usePacienteStore = defineStore("paciente", () => {
 
   const actualizarHora = (nuevaHora) => {
     console.log("actualizarHora called with:", nuevaHora);
-    hora.value = nuevaHora;
+    state.hora = nuevaHora;
   };
 
   const actualizarImagenFile = (nuevaImagenFile) => {
     console.log("actualizarImagenFile called with:", nuevaImagenFile);
-    imagenFile.value = nuevaImagenFile;
-    console.log("contenido de ImagenFile.value:", imagenFile.value);
+    state.imagenFile = nuevaImagenFile;
+    console.log("contenido de state ImagenFile:", state.imagenFile);
   };
   const actualizarImagenUrl = (nuevaImagenUrl) => {
     console.log("actualizarImagenUrl called with:", nuevaImagenUrl);
-    imagenUrl.value = nuevaImagenUrl;
+    state.imagenUrl = nuevaImagenUrl;
   };
 
   return {
@@ -147,6 +152,7 @@ export const usePacienteStore = defineStore("paciente", () => {
     actualizarImagenFile,
     actualizarImagenUrl,
     imagenUrl: state.imagenUrl,
+    imagenFile: state.imagenFile,
     obtenerHistorialCepillados,
     obtenerHistorialCepilladosPorUid,
     pacientes,

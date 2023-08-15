@@ -1,8 +1,11 @@
 <template>
   <div class="home-paciente">
+    Bienvenido, {{ userStore.name.value }}
     <q-page>
       <q-toolbar>
-        <q-toolbar-title> Bienvenido, {{ nombreUsuario }} </q-toolbar-title>
+        <q-toolbar-title>
+          Bienvenido, {{ userStore.name.value }}
+        </q-toolbar-title>
       </q-toolbar>
 
       <div class="botones-container">
@@ -28,10 +31,19 @@
 </template>
 
 <script setup>
+import { useUserStore } from "../stores/userStore.js";
+import { computed } from "vue";
 import { useRouter } from "vue-router";
+import { watchEffect } from "vue";
+
+const userStore = useUserStore();
 
 const router = useRouter();
-const nombreUsuario = "Nombre del Paciente"; // Reemplazar con el nombre del usuario real
+//const nombreUsuario = computed(() => userStore.name.value); // Reemplazar con el nombre del usuario real
+const nombreUsuario = userStore.name.value;
+
+console.log("nombre computado", userStore.computedName);
+console.log("nombre ", userStore.name);
 
 const navegarRegistroCepillado = () => {
   router.push("/RegistrarCepillado");

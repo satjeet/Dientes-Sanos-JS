@@ -1,42 +1,43 @@
 <template>
-  <q-page class="flex flex-center">
-    Estoy en la index page
-    <div v-if="userStore.name == null">
-      <q-btn class="full-width" @click="goToRegisterBrushing"
-        >Registrar Cepilladosssssssss</q-btn
-      >
-      <q-btn class="full-width" @click="goToBrushingHistory"
-        >Historial de Cepillado</q-btn
-      >
+  <q-page class="flex flex-center page-container">
+    <div v-if="userStore.name.value == null" class="welcome-container">
+      <FormularioBienvenida />
     </div>
   </q-page>
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import FormularioBienvenida from "../components/FormularioBienvenida.vue";
 import { useUserStore } from "../stores/userStore.js";
-const router = useRouter();
-const userStore = useUserStore();
-const goToRegisterBrushing = () => {
-  router.push("/RegistrarCepillado");
-};
 
-const goToBrushingHistory = () => {
-  router.push("/brushing-history");
-};
-//import FormularioBienvenida from "../components/FormularioBienvenida.vue";
+const userStore = useUserStore();
+console.log(userStore);
 </script>
 
 <style scoped>
-.centered {
-  display: flex;
-  flex-direction: column;
+.page-container {
   align-items: center;
   justify-content: center;
+  padding: 20px; /* Margen alrededor del componente */
 }
-.full-width {
+
+.welcome-container {
   width: 100%;
-  margin-top: 10px;
+  max-width: 600px; /* Puedes ajustar este valor según tus necesidades */
+  text-align: center;
+  font-size: 1rem; /* Tamaño de fuente base, puedes ajustarlo según tus necesidades */
+}
+
+/* Estilos para diferentes tamaños de pantalla */
+@media (max-width: 600px) {
+  .welcome-container {
+    font-size: 0.9rem; /* Tamaño de fuente más pequeño para dispositivos pequeños */
+  }
+}
+
+@media (min-width: 1200px) {
+  .welcome-container {
+    font-size: 1.2rem; /* Tamaño de fuente más grande para dispositivos grandes */
+  }
 }
 </style>

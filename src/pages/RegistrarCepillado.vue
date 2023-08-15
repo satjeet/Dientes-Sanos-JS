@@ -1,5 +1,11 @@
 <template>
   <div class="registrar-cepillado">
+    <q-btn
+      @click="regresarAInicio"
+      label="Regresar"
+      color="secondary"
+      class="regresar-btn"
+    />
     <h3>Registrar Cepillado</h3>
     <form @submit.prevent="guardarRegistro">
       <!-- Tus componentes aquí -->
@@ -32,6 +38,9 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 
 const PacienteStore = usePacienteStore();
+const regresarAInicio = () => {
+  router.push("/Home"); // Asume que "/home" es la ruta del inicio del paciente
+};
 
 const guardarRegistro = async () => {
   // Lógica para guardar el registro en el store de Pinia y en Firebase
@@ -63,5 +72,8 @@ const guardarRegistro = async () => {
 }
 .scale-down {
   transform: scale(0.8);
+}
+.regresar-btn {
+  margin-right: 10px;
 }
 </style>
