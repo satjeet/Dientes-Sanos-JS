@@ -1,6 +1,5 @@
 <template>
   <div class="home-paciente">
-    Bienvenido, {{ userStore.name.value }}
     <q-page>
       <q-toolbar>
         <q-toolbar-title>
@@ -25,6 +24,11 @@
         >
           Historial de Cepillados
         </q-btn>
+        <q-btn
+          label="Perfil"
+          style="width: 50%; margin: 20px 0"
+          @click="navigateToProfile"
+        />
       </div>
     </q-page>
   </div>
@@ -51,6 +55,10 @@ const navegarRegistroCepillado = () => {
 
 const navegarHistorialCepillado = () => {
   router.push("/HistorialCepillados");
+};
+
+const navigateToProfile = () => {
+  router.push("/Perfil");
 };
 </script>
 

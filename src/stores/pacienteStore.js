@@ -145,6 +145,7 @@ export const usePacienteStore = defineStore("paciente", () => {
   };
 
   return {
+    state,
     registros,
     agregarRegistro,
     actualizarFecha,

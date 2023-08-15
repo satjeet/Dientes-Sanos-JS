@@ -14,6 +14,10 @@ const routes = [
         path: "/HistorialCepillados",
         component: () => import("pages/HistorialCepilladosPaciente.vue"),
       },
+      {
+        path: "/Perfil",
+        component: () => import("pages/PacientePerfilPagina.vue"),
+      },
     ],
   },
   {
