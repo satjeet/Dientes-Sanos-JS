@@ -73,17 +73,27 @@ const handleImageAdd = (files) => {
 
 const handleImageRemoval = () => {
   imagenSeleccionada.value = null;
-  urlPreview.value =
-    imagenSeleccionada || user.image || "../assets/logo-adobe-express.svg";
+  urlPreview.value = imagenSeleccionada.value || user.image || defaultImage;
 };
 
 onMounted(async () => {
   if (!dataLoaded.value) {
-    userStore.obtenerDatosUsuario();
+    await userStore.obtenerDatosUsuario();
     urlPreview.value = user.image || defaultImage;
     dataLoaded.value = true;
   }
 });
+
+watch(
+  () => user.image,
+  (newValue) => {
+    if (newValue) {
+      urlPreview.value = newValue;
+    } else {
+      urlPreview.value = defaultImage;
+    }
+  }
+);
 
 const goToHome = () => {
   router.push("/home");
