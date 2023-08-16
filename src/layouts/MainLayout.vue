@@ -27,7 +27,7 @@
         />
 
         <!-- Botón de Cerrar Sesión en la sección de Contactenos -->
-        <div v-if="userStore.uid.value !== null">
+        <div v-if="userStore.user.uid !== null">
           <q-item clickable @click="logout">
             <q-item-section avatar>
               <q-icon name="logout" />
@@ -45,6 +45,9 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useUserStore } from "../stores/userStore.js";
 import {
   signInWithPopup,
   signInWithRedirect,
@@ -53,20 +56,13 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { auth } from "../firebase";
-import { ref, onMounted } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
-import { useUserStore } from "../stores/userStore.js";
-
-// Importa useRouter de vue-router
-import { useRouter } from "vue-router";
 
 const userStore = useUserStore();
-// Dentro de la función setup
-const router = useRouter(); // Utiliza useRouter para acceder al objeto del router
+const router = useRouter();
+const leftDrawerOpen = ref(false);
 
-const user = ref(null);
-
-const linksList = [
+const essentialLinks = [
   {
     title: "Correo Electronico",
     caption: "arturo.alfaro87@gmail.com",
@@ -74,9 +70,6 @@ const linksList = [
     link: "https://mail.google.com/mail/",
   },
 ];
-const essentialLinks = linksList;
-
-const leftDrawerOpen = ref(false);
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -85,96 +78,61 @@ function toggleLeftDrawer() {
 function navigateToHome() {
   router.push({ path: "/" });
 }
-const provider = new GoogleAuthProvider();
-function LogingGoogle() {
-  console.log("accessGoogle");
-  signInWithRedirect(auth, provider);
-}
+
 onMounted(() => {
-  // Suscribirse al evento de cambio de estado de autenticación
+  handleAuthenticationState();
+  handleRedirectResult();
+});
+
+async function handleAuthenticationState() {
   onAuthStateChanged(auth, async (authUser) => {
+    console.log("Hasta aqui llega sin caerse");
     if (authUser) {
-      const userData = await userStore.fetchUser(authUser.uid);
-      if (!userData) {
-        console.log("guarda un paciente");
+      const userData = {
+        uid: authUser.uid,
+        email: authUser.email,
+        name: authUser.displayName,
+        image: authUser.photoURL,
+      };
+      await userStore.saveUser(userData);
+      const fetchedUser = await userStore.fetchUser(authUser.uid);
+      Object.assign(userStore.user, fetchedUser);
 
-        await userStore.saveUser({
-          ...authUser,
-          role: "Paciente",
-        });
-      } else {
-        console.log("guarda el rol", userData.role);
-
-        await userStore.saveUser({
-          ...authUser,
-          role: userData.role,
-        });
-      }
-      const updatedUserData = await userStore.fetchUser(authUser.uid);
-      if (updatedUserData) {
-        userStore.setUser(updatedUserData);
-      }
-      if (updatedUserData && updatedUserData.role === "Doctor") {
-        router.push("/Homedoc");
-      } else {
-        router.push("/Home");
-      }
+      router.push(
+        userData && userData.role === "Doctor" ? "/Homedoc" : "/Home"
+      );
     } else {
-      user.value = null;
       userStore.resetUser();
     }
   });
+}
 
-  getRedirectResult(auth)
-    .then(async (result) => {
-      // This gives you a Google Access Token. You can use it to access the Google API.
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const token = credential.accessToken;
-
-      user.value = result.user;
-
-      // Guardar el usuario en Firestore
+async function handleRedirectResult() {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result && result.user) {
       await userStore.saveUser(result.user);
-
-      const userData = await userStore.fetchUser(result.user.uid);
-      if (userData) {
-        userStore.setUser(userData);
-      }
-      // Asignar el usuario en el store de usuario
-      /*
-      userStore.setUser({
-        ...result.user,
-        role: "Paciente", // Rol por defecto
-      });
-*/
-      // Redirigir al home del paciente
+      userStore.setUser(await userStore.fetchUser(result.user.uid));
       router.push("/Home");
-    })
-    .catch((error) => {
-      // Handle Errors here.
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      // The email of the user's account used.
-      const email = error.customData ? error.customData.email : null;
-      // The AuthCredential type that was used.
-      const credential = GoogleAuthProvider.credentialFromError(error);
-      // ...
-    });
-});
+    }
+  } catch (error) {
+    console.error("Error during redirect authentication:", error);
+  }
+}
+
 function logout() {
   auth
     .signOut()
     .then(() => {
       userStore.resetUser();
-      user.value = null;
-      // Redirige al usuario a la página de inicio
       router.push({ path: "/" });
     })
     .catch((error) => {
-      console.error("Error signing out: ", error);
+      console.error("Error signing out:", error);
     });
 }
 </script>
+
 <style scoped>
 .q-layout {
   background: #ffffff;

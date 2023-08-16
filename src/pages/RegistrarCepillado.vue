@@ -45,12 +45,6 @@ const regresarAInicio = () => {
 const guardarRegistro = async () => {
   // Lógica para guardar el registro en el store de Pinia y en Firebase
   try {
-    /*const nuevoRegistro = {
-      fecha: CalendarioComponente.fecha.value,
-      hora: RelojComponente.hora.value,
-      imagenUrl: ImagenVisualizacion.imagenSeleccionada.value,
-    };
-    */
     await PacienteStore.agregarRegistro().then(() => {
       // Redirige al usuario a la página de inicio después de guardar el registro
       router.push("/home");

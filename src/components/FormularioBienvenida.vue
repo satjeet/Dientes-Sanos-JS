@@ -59,15 +59,15 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "../stores/userStore.js";
-import { auth } from "../firebase";
 import {
   sendPasswordResetEmail,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
+import { auth } from "../firebase";
 
-const router = useRouter();
 const userStore = useUserStore();
+const router = useRouter();
 
 const tab = ref("inicio-sesion");
 const email = ref("");
@@ -76,12 +76,12 @@ const confirmPassword = ref("");
 const dialog = ref(false);
 const dialogMessage = ref("");
 
-const mostrarDialog = (mensaje) => {
+function mostrarDialog(mensaje) {
   dialogMessage.value = mensaje;
   dialog.value = true;
-};
+}
 
-const registrar = async () => {
+async function registrar() {
   if (password.value !== confirmPassword.value) {
     mostrarDialog("Las contraseñas no coinciden");
     return;
@@ -92,43 +92,29 @@ const registrar = async () => {
       email.value,
       password.value
     );
-    const user = userCredential.user;
-    if (user) {
-      await userStore.saveUser(user);
-      userStore.setUser(user);
-      router.push("/Home");
-    }
+    await userStore.saveUser(userCredential.user);
+    userStore.setUser(await userStore.fetchUser(userCredential.user.uid));
+    router.push("/Home");
   } catch (error) {
     mostrarDialog("Error en el registro: " + error.message);
   }
-};
+}
 
-const iniciarSesion = async () => {
+async function iniciarSesion() {
   try {
     const userCredential = await signInWithEmailAndPassword(
       auth,
       email.value,
       password.value
     );
-    const user = userCredential.user;
-    if (user) {
-      const userData = await userStore.fetchUser(user.uid);
-      if (userData) {
-        userStore.setUser(userData);
-        router.push("/Home");
-      }
-    }
+    userStore.setUser(await userStore.fetchUser(userCredential.user.uid));
+    router.push("/Home");
   } catch (error) {
-    let mensajeError = "Error en el inicio de sesión.";
-    if (error.code === "auth/wrong-password") {
-      mensajeError = "Contraseña incorrecta. Por favor, inténtalo de nuevo.";
-    }
-    mostrarDialog(mensajeError);
-    console.error("Error en el inicio de sesión:", error.message);
+    mostrarDialog("Error en el inicio de sesión: " + error.message);
   }
-};
+}
 
-const olvideContrasena = () => {
+function olvideContrasena() {
   sendPasswordResetEmail(auth, email.value)
     .then(() => {
       mostrarDialog("Correo de restablecimiento de contraseña enviado!");
@@ -136,7 +122,7 @@ const olvideContrasena = () => {
     .catch((error) => {
       mostrarDialog("Error al enviar el correo: " + error.message);
     });
-};
+}
 </script>
 
 <style scoped>

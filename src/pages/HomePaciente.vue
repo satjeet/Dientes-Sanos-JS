@@ -3,7 +3,7 @@
     <q-page>
       <q-toolbar>
         <q-toolbar-title>
-          Bienvenido, {{ userStore.name.value }}
+          Bienvenido, {{ userStore.user.name }}
         </q-toolbar-title>
       </q-toolbar>
 
@@ -35,19 +35,23 @@
 </template>
 
 <script setup>
-import { useUserStore } from "../stores/userStore.js";
-import { computed } from "vue";
+import { ref, onMounted, computed } from "vue";
+import { useUserStore } from "../stores/userStore";
 import { useRouter } from "vue-router";
-import { watchEffect } from "vue";
 
 const userStore = useUserStore();
-
 const router = useRouter();
-//const nombreUsuario = computed(() => userStore.name.value); // Reemplazar con el nombre del usuario real
-const nombreUsuario = userStore.name.value;
 
-console.log("nombre computado", userStore.computedName);
-console.log("nombre ", userStore.name);
+const dataLoaded = ref(false); // Estado para rastrear si los datos están cargados
+
+const userData = computed(() => userStore.user); // Propiedad computada para obtener los datos del usuario
+
+onMounted(async () => {
+  // Asume que userStore tiene una función similar a obtenerHistorialCepillados
+  await userStore.obtenerDatosUsuario();
+  console.log("Datos del usuario:", userData.value);
+  dataLoaded.value = true; // Actualiza el estado una vez que los datos estén cargados
+});
 
 const navegarRegistroCepillado = () => {
   router.push("/RegistrarCepillado");
