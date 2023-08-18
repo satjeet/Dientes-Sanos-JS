@@ -99,10 +99,11 @@ async function handleAuthenticationState() {
       Object.assign(userStore.user, fetchedUser);
 
       router.push(
-        userData && userData.role === "Doctor" ? "/Homedoc" : "/Home"
+        userData && userData.role === "Doctor" ? "/Homedoc" : "/inicio"
       );
     } else {
-      userStore.resetUser();
+      console.log("quiero ver cada vez que se ejecute en reset mal parido");
+      // userStore.resetUser();
     }
   });
 }

@@ -8,8 +8,16 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
+import {
+  sendPasswordResetEmail,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { useRouter } from "vue-router";
 
 export const useUserStore = () => {
+  const route = useRouter();
+
   const user = reactive({
     name: null,
     email: null,
@@ -23,6 +31,11 @@ export const useUserStore = () => {
   });
 
   const isUserSet = computed(() => user.name !== null && user.uid !== null);
+  function getCurrentUID() {
+    return user.uid ? auth.currentUser.uid : null;
+  }
+
+  /*
   const getCurrentUID = () => {
     const user = auth.currentUser;
     console.log("getCurrentUID");
@@ -30,9 +43,32 @@ export const useUserStore = () => {
 
     return user ? user.uid : null;
   };
+  */
+  const loginUser = async (email, password) => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const uid = userCredential.user.uid;
+      await fetchUser(uid); // Esto actualizará el objeto 'user' en el store
+
+      console.log("asegurandome que tengo al user, antes de ver su rol", user);
+      // Verificar el rol del usuario
+      if (user.role === "Doctor") {
+        route.push("/HomeDoc");
+      } else {
+        route.push("/inicio");
+      }
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+      // Aquí puedes manejar el error como prefieras, por ejemplo, mostrando un mensaje al usuario
+    }
+  };
   const obtenerDatosUsuario = async () => {
     try {
-      console.error("el current uid:", user.uid);
+      console.log("el current uid:", user.uid);
 
       // Asume que tienes una forma de obtener el UID del usuario actual
       const currentUID = getCurrentUID();
@@ -69,6 +105,7 @@ export const useUserStore = () => {
     }
   };
 
+  //Alimnetamos al user con los datos que trae de firebase
   const fetchUser = async (uidValue) => {
     if (!uidValue) {
       console.error("UID is missing or null:", uidValue);
@@ -146,6 +183,7 @@ export const useUserStore = () => {
 
   return {
     user,
+    loginUser,
     updateUserProfile,
     isUserSet,
     saveUser,

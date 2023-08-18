@@ -35,22 +35,35 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onBeforeMount, computed } from "vue";
 import { useUserStore } from "../stores/userStore";
 import { useRouter } from "vue-router";
+import { auth } from "../firebase.js";
 
 const userStore = useUserStore();
 const router = useRouter();
 
-const dataLoaded = ref(false); // Estado para rastrear si los datos están cargados
+const dataLoaded = ref(false);
+const error = ref(null); // Estado para rastrear errores
 
-const userData = computed(() => userStore.user); // Propiedad computada para obtener los datos del usuario
+const userData = computed(() => userStore.user);
 
-onMounted(async () => {
-  // Asume que userStore tiene una función similar a obtenerHistorialCepillados
-  await userStore.obtenerDatosUsuario();
-  console.log("Datos del usuario:", userData.value);
-  dataLoaded.value = true; // Actualiza el estado una vez que los datos estén cargados
+onBeforeMount(async () => {
+  try {
+    await userStore.obtenerDatosUsuario();
+    console.log("Datos del usuario:", userData.value);
+  } catch (err) {
+    console.error("Error al obtener los datos del usuario:", err);
+    error.value = err;
+  } finally {
+    const userRole = userStore.user.rol;
+    console.log("Datos del userRole:", userRole);
+
+    if (userRole === "Doctor") {
+      router.push("/HomeDoc");
+    }
+    dataLoaded.value = true;
+  }
 });
 
 const navegarRegistroCepillado = () => {

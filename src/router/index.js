@@ -97,7 +97,7 @@ export default route(function (/* { store, ssrContext } */) {
   onAuthStateChanged(auth, (user) => {
     if (user && Router.currentRoute.value.path === "/") {
       // Si hay un usuario autenticado y está en la ruta "/", redirige a "/home"
-      Router.push({ path: "/home" });
+      Router.push({ path: "/inicio" });
     }
     // No redirigir si no hay un usuario autenticado
   });
