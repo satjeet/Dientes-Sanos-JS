@@ -51,12 +51,12 @@ const userData = computed(() => userStore.user);
 onBeforeMount(async () => {
   try {
     await userStore.obtenerDatosUsuario();
-    console.log("Datos del usuario:", userData.value);
+    console.log("Datos del usuario:", userData);
   } catch (err) {
     console.error("Error al obtener los datos del usuario:", err);
     error.value = err;
   } finally {
-    const userRole = userStore.user.rol;
+    const userRole = userStore.user.role;
     console.log("Datos del userRole:", userRole);
 
     if (userRole === "Doctor") {

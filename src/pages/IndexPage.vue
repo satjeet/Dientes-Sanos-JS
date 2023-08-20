@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex flex-center page-container">
-    <div v-if="userStore.name == null" class="welcome-container">
+    <div class="welcome-container">
       <FormularioBienvenida />
     </div>
   </q-page>

@@ -1,6 +1,6 @@
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import { reactive, computed } from "vue";
+import { reactive, computed, toRefs } from "vue";
 import { auth } from "../firebase";
 import {
   getStorage,
@@ -14,8 +14,9 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { useRouter } from "vue-router";
+import { defineStore } from "pinia";
 
-export const useUserStore = () => {
+export const useUserStore = defineStore("usuario", () => {
   const route = useRouter();
 
   const user = reactive({
@@ -30,11 +31,15 @@ export const useUserStore = () => {
     cellphone: null,
   });
 
-  const isUserSet = computed(() => user.name !== null && user.uid !== null);
+  const isUserSet = computed(() => user.email !== null && user.uid !== null);
   function getCurrentUID() {
     return user.uid ? auth.currentUser.uid : null;
   }
 
+  // Función para obtener el usuario activo
+  const fetchUserActivo = () => {
+    return user.value;
+  };
   /*
   const getCurrentUID = () => {
     const user = auth.currentUser;
@@ -59,7 +64,7 @@ export const useUserStore = () => {
       if (user.role === "Doctor") {
         route.push("/HomeDoc");
       } else {
-        route.push("/inicio");
+        route.push("/RegistrarCepillado");
       }
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
@@ -127,6 +132,7 @@ export const useUserStore = () => {
   };
 
   const resetUser = () => {
+    console.log("se resetea la userStore");
     Object.assign(user, {
       name: null,
       email: null,
@@ -182,7 +188,7 @@ export const useUserStore = () => {
   };
 
   return {
-    user,
+    ...toRefs(user),
     loginUser,
     updateUserProfile,
     isUserSet,
@@ -192,4 +198,4 @@ export const useUserStore = () => {
     obtenerDatosUsuario,
     initialize,
   };
-};
+});

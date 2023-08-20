@@ -4,7 +4,7 @@ const routes = [
     component: () => import("layouts/MainLayout.vue"),
     children: [
       { path: "", component: () => import("pages/IndexPage.vue") },
-      { path: "/inicio", component: () => import("pages/HomePaciente.vue") },
+      //{ path: "/inicio", component: () => import("pages/HomePaciente.vue") },
       {
         path: "/inicioProfesional",
         component: () => import("pages/HomeDoctor.vue"),
@@ -24,17 +24,29 @@ const routes = [
         name: "RecuperarContrasena",
         component: () => import("pages/RecuperarClaveUsuario.vue"),
       },
-      {
-        path: "/RegistrarCepillado",
-        component: () => import("pages/RegistrarCepillado.vue"),
-      },
+
       {
         path: "/HistorialCepillados",
         component: () => import("pages/HistorialCepilladosPaciente.vue"),
       },
       {
-        path: "/Perfil",
-        component: () => import("pages/UsuarioPerfilPagina.vue"),
+        path: "/perfil",
+        component: () => import("pages/PerfilUsuarioPagina.vue"),
+      },
+      {
+        path: "/actualizarperfil",
+        component: () => import("pages/ActualizarDatosUsuarioPagina.vue"),
+      },
+    ],
+  },
+  {
+    path: "/usuario",
+    component: () => import("layouts/UserLayout.vue"),
+    children: [
+      { path: "/inicio", component: () => import("pages/HomePaciente.vue") },
+      {
+        path: "/RegistrarCepillado",
+        component: () => import("pages/RegistrarCepillado.vue"),
       },
     ],
   },
