@@ -43,7 +43,10 @@ const routes = [
     path: "/usuario",
     component: () => import("layouts/UserLayout.vue"),
     children: [
-      { path: "/inicio", component: () => import("pages/HomePaciente.vue") },
+      {
+        path: "/inicio",
+        component: () => import("pages/InicioUsuarioPagina.vue"),
+      },
       {
         path: "/RegistrarCepillado",
         component: () => import("pages/RegistrarCepillado.vue"),

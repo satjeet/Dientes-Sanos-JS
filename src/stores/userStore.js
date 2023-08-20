@@ -64,7 +64,7 @@ export const useUserStore = defineStore("usuario", () => {
       if (user.role === "Doctor") {
         route.push("/HomeDoc");
       } else {
-        route.push("/RegistrarCepillado");
+        route.push("/usuario/inicio");
       }
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
@@ -109,6 +109,36 @@ export const useUserStore = defineStore("usuario", () => {
       throw error;
     }
   };
+  //guardar foto del cepillado
+  async function agregarRegistro(imagenFile, fecha, hora) {
+    try {
+      if (!imagenFile || !imagenFile.name) {
+        console.error(
+          "No hay imagen seleccionada o el nombre de archivo no es válido"
+        );
+        return;
+      }
+
+      const userId = auth.currentUser.uid;
+      const storage = getStorage();
+      const filePath = `usuarios/${userId}/images/${imagenFile.name}`;
+      const fileRef = storageRef(storage, filePath);
+      const snapshot = await uploadBytes(fileRef, imagenFile);
+
+      const imagenUrl = await getDownloadURL(snapshot.ref);
+
+      const nuevoRegistro = {
+        fecha: fecha,
+        hora: hora,
+        imagenUrl: imagenUrl,
+      };
+
+      const cepilladoRef = collection(db, "usuarios", userId, "cepillados");
+      await addDoc(cepilladoRef, nuevoRegistro);
+    } catch (error) {
+      console.error("Error al agregar el registro: ", error);
+    }
+  }
 
   //Alimnetamos al user con los datos que trae de firebase
   const fetchUser = async (uidValue) => {
