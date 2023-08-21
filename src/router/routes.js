@@ -51,6 +51,10 @@ const routes = [
         path: "/RegistrarCepillado",
         component: () => import("pages/RegistrarCepillado.vue"),
       },
+      {
+        path: "/historialCepillados",
+        component: () => import("pages/HistorialCepilladosPaciente.vue"),
+      },
     ],
   },
   {

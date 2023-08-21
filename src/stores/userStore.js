@@ -1,4 +1,4 @@
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, addDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { reactive, computed, toRefs } from "vue";
 import { auth } from "../firebase";
@@ -64,13 +64,46 @@ export const useUserStore = defineStore("usuario", () => {
       if (user.role === "Doctor") {
         route.push("/HomeDoc");
       } else {
-        route.push("/usuario/inicio");
+        route.push("/inicio");
       }
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       // Aquí puedes manejar el error como prefieras, por ejemplo, mostrando un mensaje al usuario
     }
   };
+
+  const register = async (email, password, name, birthdate, cellphone) => {
+    try {
+      // Registrar el usuario con email y contraseña en Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const uid = userCredential.user.uid;
+
+      // Guardar la información adicional del usuario en Firestore
+      const userData = {
+        uid,
+        name,
+        email,
+        birthdate,
+        cellphone,
+        role: "Paciente", // Asumo que por defecto todos los registros son de pacientes
+        //... Otros campos que quieras guardar
+      };
+
+      await saveUser({ ...userData }); // Usando la función saveUser que ya tienes definida en tu store
+
+      return uid; // Devuelve el UID del usuario recién registrado, por si necesitas hacer algo más con él después
+    } catch (error) {
+      console.error("Error al registrar el usuario:", error);
+      throw error; // Lanza el error para que puedas manejarlo en el componente si es necesario
+    }
+  };
+
+  //... Resto del código de tu store
+
   const obtenerDatosUsuario = async () => {
     try {
       console.log("el current uid:", user.uid);
@@ -110,7 +143,7 @@ export const useUserStore = defineStore("usuario", () => {
     }
   };
   //guardar foto del cepillado
-  async function agregarRegistro(imagenFile, fecha, hora) {
+  async function agregarRegistroFotograficoUsuario(imagenFile, fechayhora) {
     try {
       if (!imagenFile || !imagenFile.name) {
         console.error(
@@ -128,8 +161,8 @@ export const useUserStore = defineStore("usuario", () => {
       const imagenUrl = await getDownloadURL(snapshot.ref);
 
       const nuevoRegistro = {
-        fecha: fecha,
-        hora: hora,
+        fecha: fechayhora,
+        hora: fechayhora,
         imagenUrl: imagenUrl,
       };
 
@@ -227,5 +260,13 @@ export const useUserStore = defineStore("usuario", () => {
     resetUser,
     obtenerDatosUsuario,
     initialize,
+    register,
+    agregarRegistroFotograficoUsuario,
+    isLoading: false, // Nuevo estado de carga
+    async initialize() {
+      // Simulando una operación asíncrona que demora 2 segundos.
+      //await new Promise((resolve) => setTimeout(resolve, 2000));
+      this.isLoading = false;
+    },
   };
 });

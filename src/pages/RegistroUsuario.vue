@@ -49,13 +49,23 @@ const telefono = ref("");
 const userStore = useUserStore();
 
 const registrarUsuario = async () => {
-  await userStore.register(
-    email.value,
-    password.value,
-    name.value,
-    fechaNacimiento.value,
-    telefono.value
-  );
+  try {
+    await userStore.register(
+      email.value,
+      password.value,
+      name.value,
+      fechaNacimiento.value,
+      telefono.value
+    );
+
+    // Redireccionar al usuario a /inicio
+    router.push("/inicio");
+
+    // Aquí puedes hacer algo después de que el registro sea exitoso, como redirigir al usuario a otra página o mostrar un mensaje
+  } catch (error) {
+    // Manejar el error, por ejemplo, mostrando un mensaje al usuario
+    console.error("Error al registrar el usuario:", error.message);
+  }
 };
 
 const goBack = () => {

@@ -63,7 +63,7 @@ watch(
 );
 
 const accionInicio = () => {
-  router.push("/perfil");
+  router.push("/inicio");
 };
 
 const accionAlarmas = () => {
@@ -71,7 +71,7 @@ const accionAlarmas = () => {
 };
 
 const accionHistorial = () => {
-  router.push("/perfil");
+  router.push("/HistorialCepillados");
 };
 
 const accionPerfil = () => {

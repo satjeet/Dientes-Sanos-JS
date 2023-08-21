@@ -40,7 +40,7 @@ onMounted(async () => {
 });
 
 const regresarAInicio = () => {
-  router.push("/Home");
+  router.push("/inicio");
 };
 </script>
 <style scoped>
